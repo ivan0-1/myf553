@@ -15,9 +15,9 @@ Class3=CMyf553View
 Class4=CMainFrame
 
 ResourceCount=3
-Resource1=IDR_MAINFRAME
+Resource1=IDD_ABOUTBOX
 Class5=CAboutDlg
-Resource2=IDD_ABOUTBOX
+Resource2=IDR_MAINFRAME
 Class6=CDlgHistogram
 Resource3=IDD_HISTOGRAM
 
