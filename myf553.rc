@@ -99,6 +99,8 @@ BEGIN
     BUTTON      ID_GRAY
     BUTTON      ID_HISTOGRAM
     BUTTON      ID_HISTOGRAM_SUPER
+    BUTTON      ID_LINEARTRANS
+    BUTTON      ID_EQUALIZE
 END
 
 
@@ -379,6 +381,8 @@ BEGIN
     ID_RELOAD               "重新加载图像\n重载"
     ID_HISTOGRAM            "对话框显示图像直方图\n直方图"
     ID_HISTOGRAM_SUPER      "画面显示直方图\n直方图"
+    32776                   "线性点运算\n点运算"
+    ID_EQUALIZE             "直方图均衡化\n均衡化"
 END
 
 #endif    // Chinese (中国) resources

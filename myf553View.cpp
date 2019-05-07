@@ -31,6 +31,10 @@ BEGIN_MESSAGE_MAP(CMyf553View, CScrollView)
 	ON_UPDATE_COMMAND_UI(ID_HISTOGRAM, OnUpdateHistogram)
 	ON_COMMAND(ID_HISTOGRAM_SUPER, OnHistogramSuper)
 	ON_UPDATE_COMMAND_UI(ID_HISTOGRAM_SUPER, OnUpdateHistogramSuper)
+	ON_COMMAND(ID_LINEARTRANS, OnLineartrans)
+	ON_UPDATE_COMMAND_UI(ID_LINEARTRANS, OnUpdateLineartrans)
+	ON_COMMAND(ID_EQUALIZE, OnEqualize)
+	ON_UPDATE_COMMAND_UI(ID_EQUALIZE, OnUpdateEqualize)
 	//}}AFX_MSG_MAP
 	// Standard printing commands
 	ON_COMMAND(ID_FILE_PRINT, CScrollView::OnFilePrint)
@@ -88,7 +92,7 @@ void CMyf553View::OnDraw(CDC* pDC)
 		RECT r;
 		r.left = lpBitsInfo->bmiHeader.biWidth + 30;
 		r.top = 30;
-		r.right = r.left + 256;
+		r.right = r.left + 256 + 2;
 		r.bottom = r.top + 130;
 		LPCRECT rectangle= &r;
 		pDC->Rectangle(rectangle);
@@ -102,8 +106,8 @@ void CMyf553View::OnDraw(CDC* pDC)
 		}
 
 		for(i = 0; i < 256; i++) {
-			POINT b = {r.left + i, r.bottom - 1};
-			POINT e = {r.left + i, r.bottom - H[i] * (r.bottom - r.top - 20) / max - 1};
+			POINT b = {r.left + i + 1, r.bottom - 1};
+			POINT e = {r.left + i + 1, r.bottom - H[i] * (r.bottom - r.top - 20) / max - 1};
 			pDC->MoveTo(b);
 			pDC->LineTo(e);
 		}
@@ -230,6 +234,32 @@ void CMyf553View::OnHistogramSuper()
 }
 
 void CMyf553View::OnUpdateHistogramSuper(CCmdUI* pCmdUI) 
+{
+	// TODO: Add your command update UI handler code here
+	pCmdUI->Enable(isGray == TRUE);
+}
+
+void CMyf553View::OnLineartrans() 
+{
+	// TODO: Add your command handler code here
+	linearTrans(1.1,-10);
+	Invalidate();
+}
+
+void CMyf553View::OnUpdateLineartrans(CCmdUI* pCmdUI) 
+{
+	// TODO: Add your command update UI handler code here
+	pCmdUI->Enable(isGray == TRUE);
+}
+
+void CMyf553View::OnEqualize() 
+{
+	// TODO: Add your command handler code here
+	equalize();
+	Invalidate();
+}
+
+void CMyf553View::OnUpdateEqualize(CCmdUI* pCmdUI) 
 {
 	// TODO: Add your command update UI handler code here
 	pCmdUI->Enable(isGray == TRUE);

@@ -210,3 +210,53 @@ void histogram() {
 	}
 
 }
+
+void linearTrans(double a, int b){
+	
+	int lineBytes = (lpBitsInfo->bmiHeader.biWidth * lpBitsInfo->bmiHeader.biBitCount + 31) / 32 * 4;
+	int imgSize = lineBytes * lpBitsInfo->bmiHeader.biHeight;
+
+	BYTE *lpBits = (BYTE *)&lpBitsInfo->bmiColors[lpBitsInfo->bmiHeader.biClrUsed];
+
+	double pixel;
+	for (int i = 0; i < imgSize; i++) {
+		pixel = lpBits[i] * a + b +0.5;
+		if(pixel > 255) {
+			pixel = 255;
+		}else if(pixel < 0) {
+			pixel = 0;
+		}
+		lpBits[i] = (BYTE)pixel;
+	}
+
+	histogram();
+}
+
+void equalize() {
+
+	int lineBytes = (lpBitsInfo->bmiHeader.biWidth * lpBitsInfo->bmiHeader.biBitCount + 31) / 32 * 4;
+	int imgSize = lineBytes * lpBitsInfo->bmiHeader.biHeight;
+
+	BYTE *lpBits = (BYTE *)&lpBitsInfo->bmiColors[lpBitsInfo->bmiHeader.biClrUsed];
+	int i;
+
+	histogram();
+
+	double cH[256];
+	cH[0] = 1.0 * H[0] / imgSize;
+	for(i = 1; i < 256; i++) {
+		cH[i] = 1.0 * H[i] / imgSize + cH[i - 1];
+	}
+
+	int D[255];
+	for(i = 0; i < 256; i++) {
+		D[i] = (int)(cH[i] * 255 + 0.5);
+	}
+
+
+	for(i = 0; i < imgSize; i++) {
+		lpBits[i] = D[lpBits[i]];
+	}
+
+	histogram();
+}

@@ -2,7 +2,7 @@
 
 [General Info]
 Version=1
-LastClass=CDlgHistogram
+LastClass=CMyf553View
 LastTemplate=CDialog
 NewFileInclude1=#include "stdafx.h"
 NewFileInclude2=#include "myf553.h"
@@ -41,7 +41,7 @@ Type=0
 HeaderFile=myf553View.h
 ImplementationFile=myf553View.cpp
 Filter=C
-LastObject=ID_HISTOGRAM_SUPER
+LastObject=ID_EQUALIZE
 BaseClass=CScrollView
 VirtualFilter=VWC
 
@@ -125,7 +125,9 @@ Command9=ID_RELOAD
 Command10=ID_GRAY
 Command11=ID_HISTOGRAM
 Command12=ID_HISTOGRAM_SUPER
-CommandCount=12
+Command13=ID_LINEARTRANS
+Command14=ID_EQUALIZE
+CommandCount=14
 
 [DLG:IDD_HISTOGRAM]
 Type=1

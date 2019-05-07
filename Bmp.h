@@ -11,3 +11,5 @@ BOOL loadBmpFile(char * bmpFileName);
 void gray();
 void pixel(int x, int y, char *str);
 void histogram();
+void linearTrans(double a, int b);
+void equalize();
