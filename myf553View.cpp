@@ -35,6 +35,14 @@ BEGIN_MESSAGE_MAP(CMyf553View, CScrollView)
 	ON_UPDATE_COMMAND_UI(ID_LINEARTRANS, OnUpdateLineartrans)
 	ON_COMMAND(ID_EQUALIZE, OnEqualize)
 	ON_UPDATE_COMMAND_UI(ID_EQUALIZE, OnUpdateEqualize)
+	ON_COMMAND(ID_FOURIER, OnFourier)
+	ON_UPDATE_COMMAND_UI(ID_FOURIER, OnUpdateFourier)
+	ON_COMMAND(ID_INVERT_FOURIER, OnInvertFourier)
+	ON_UPDATE_COMMAND_UI(ID_INVERT_FOURIER, OnUpdateInvertFourier)
+	ON_COMMAND(ID_FAST_FOURIER, OnFastFourier)
+	ON_UPDATE_COMMAND_UI(ID_FAST_FOURIER, OnUpdateFastFourier)
+	ON_COMMAND(ID_INVERT_FAST_FOURIER, OnInvertFastFourier)
+	ON_UPDATE_COMMAND_UI(ID_INVERT_FAST_FOURIER, OnUpdateInvertFastFourier)
 	//}}AFX_MSG_MAP
 	// Standard printing commands
 	ON_COMMAND(ID_FILE_PRINT, CScrollView::OnFilePrint)
@@ -71,27 +79,44 @@ void CMyf553View::OnDraw(CDC* pDC)
 	ASSERT_VALID(pDoc);
 	// TODO: add draw code for native data here
 
-	if(NULL == lpBitsInfo)
-		return ;
-	LPVOID lpBits = (LPVOID)&lpBitsInfo->bmiColors[lpBitsInfo->bmiHeader.biClrUsed];
-	StretchDIBits(
-		pDC->GetSafeHdc(),
-		0, 0,
-		lpBitsInfo->bmiHeader.biWidth,
-		lpBitsInfo->bmiHeader.biHeight,
-		0, 0,
-		lpBitsInfo->bmiHeader.biWidth,
-		lpBitsInfo->bmiHeader.biHeight,
-		lpBits,
-		lpBitsInfo,
-		DIB_RGB_COLORS,
-		SRCCOPY
-	);
+	if(lpBitsInfo != NULL) {
+		LPVOID lpBits = (LPVOID)&lpBitsInfo->bmiColors[lpBitsInfo->bmiHeader.biClrUsed];
+		StretchDIBits(
+			pDC->GetSafeHdc(),
+			0, 0,
+			lpBitsInfo->bmiHeader.biWidth,
+			lpBitsInfo->bmiHeader.biHeight,
+			0, 0,
+			lpBitsInfo->bmiHeader.biWidth,
+			lpBitsInfo->bmiHeader.biHeight,
+			lpBits,
+			lpBitsInfo,
+			DIB_RGB_COLORS,
+			SRCCOPY
+		);
+	}
+
+	if(lpBitsInfo_fourier != NULL) {
+		LPVOID lpBits_fourier = (LPVOID)&lpBitsInfo_fourier->bmiColors[lpBitsInfo_fourier->bmiHeader.biClrUsed];
+		StretchDIBits(
+			pDC->GetSafeHdc(),
+			600, 0,
+			lpBitsInfo_fourier->bmiHeader.biWidth,
+			lpBitsInfo_fourier->bmiHeader.biHeight,
+			0, 0,
+			lpBitsInfo_fourier->bmiHeader.biWidth,
+			lpBitsInfo_fourier->bmiHeader.biHeight,
+			lpBits_fourier,
+			lpBitsInfo_fourier,
+			DIB_RGB_COLORS,
+			SRCCOPY
+		);
+	}
 
 	if(showHistogram){
 		RECT r;
-		r.left = lpBitsInfo->bmiHeader.biWidth + 30;
-		r.top = 30;
+		r.left = 30;
+		r.top = lpBitsInfo->bmiHeader.biHeight + 30;
 		r.right = r.left + 256 + 2;
 		r.bottom = r.top + 130;
 		LPCRECT rectangle= &r;
@@ -260,6 +285,59 @@ void CMyf553View::OnEqualize()
 }
 
 void CMyf553View::OnUpdateEqualize(CCmdUI* pCmdUI) 
+{
+	// TODO: Add your command update UI handler code here
+	pCmdUI->Enable(isGray == TRUE);
+}
+
+
+void CMyf553View::OnFourier() 
+{
+	// TODO: Add your command handler code here
+	fourier();
+	Invalidate();
+}
+
+void CMyf553View::OnUpdateFourier(CCmdUI* pCmdUI) 
+{
+	// TODO: Add your command update UI handler code here
+	pCmdUI->Enable(isGray == TRUE);
+}
+
+void CMyf553View::OnInvertFourier() 
+{
+	// TODO: Add your command handler code here
+	invertFourier();
+	Invalidate();
+}
+
+void CMyf553View::OnUpdateInvertFourier(CCmdUI* pCmdUI) 
+{
+	// TODO: Add your command update UI handler code here
+	pCmdUI->Enable(isGray == TRUE);
+}
+
+void CMyf553View::OnFastFourier() 
+{
+	// TODO: Add your command handler code here
+	fastFourier();
+	Invalidate();
+}
+
+void CMyf553View::OnUpdateFastFourier(CCmdUI* pCmdUI) 
+{
+	// TODO: Add your command update UI handler code here
+	pCmdUI->Enable(isGray == TRUE);
+}
+
+void CMyf553View::OnInvertFastFourier() 
+{
+	// TODO: Add your command handler code here
+	invertFastFourier();
+	Invalidate();
+}
+
+void CMyf553View::OnUpdateInvertFastFourier(CCmdUI* pCmdUI) 
 {
 	// TODO: Add your command update UI handler code here
 	pCmdUI->Enable(isGray == TRUE);

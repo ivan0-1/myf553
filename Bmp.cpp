@@ -1,11 +1,19 @@
 #include "stdafx.h"
 #include <stdio.h>
 #include <math.h>
+#include <complex>
+using namespace std;
+
+#define PI 3.1415926535
 
 BITMAPINFO *lpBitsInfo = NULL;
+BITMAPINFO *lpBitsInfo_fourier = NULL;
 int isGray = FALSE;
 int H[256] = {0, };
-int showHistogram;
+int showHistogram = FALSE;
+
+void FT(complex<double>* TD, complex<double>* FD, int M);
+void IFT(complex<double>* FD, complex<double>* TD, int M);
 
 int checkGray() {
 
@@ -259,4 +267,66 @@ void equalize() {
 	}
 
 	histogram();
+}
+
+
+void fourier() {
+
+	int lineBytes = (lpBitsInfo->bmiHeader.biWidth * lpBitsInfo->bmiHeader.biBitCount + 31) / 32 * 4;
+	int imgSize = lineBytes * lpBitsInfo->bmiHeader.biHeight;
+	int size = sizeof(BITMAPINFOHEADER) + sizeof(RGBQUAD) * 256 + imgSize;
+
+	lpBitsInfo_fourier = (LPBITMAPINFO)malloc(size);
+	memcpy(&lpBitsInfo_fourier->bmiHeader, &lpBitsInfo->bmiHeader, sizeof(BITMAPINFOHEADER));
+	
+	BYTE *lpBits = (BYTE *)&lpBitsInfo->bmiColors[lpBitsInfo->bmiHeader.biClrUsed];
+	BYTE *lpBits_fourier = (BYTE *)&lpBitsInfo_fourier->bmiColors[lpBitsInfo_fourier->bmiHeader.biClrUsed];
+
+	int w = lpBitsInfo->bmiHeader.biWidth;
+	int h = lpBitsInfo->bmiHeader.biHeight;
+
+	complex<double>* TD = new complex<double>[w * h];
+	complex<double>* FD = new complex<double>[w * h];
+	
+	for(int i = 0; i < imgSize; i++) {
+		TD[i] = complex<double>(lpBits[i] , 0);
+	}
+
+}
+
+void FT(complex<double>* TD, complex<double>* FD, int M) {
+
+	for(int u = 0; u < M; u++) {
+		FD[u] = 0;
+		for(int x = 0; x < M; x++) {
+			double angle = -2 * PI * u * x / M;
+			FD[u] += TD[x] * complex<double>(cos(angle), sin(angle));
+		}
+		FD[u] /= M;
+	}
+}
+
+
+void invertFourier() {
+	AfxMessageBox("invertFourier");
+}
+
+void IFT(complex<double>* FD, complex<double>* TD, int M) {
+
+	for(int u = 0; u < M; u++) {
+		TD[u] = 0;
+		for(int x = 0; x < M; x++) {
+			double angle = 2 * PI * u * x / M;
+			TD[u] += FD[x] * complex<double>(cos(angle), sin(angle));
+		}
+		FD[u] /= M;
+	}
+}
+
+void fastFourier() {
+	AfxMessageBox("fastFourier");
+}
+
+void invertFastFourier() {
+	AfxMessageBox("invertFastFourier");
 }

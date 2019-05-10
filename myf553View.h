@@ -61,6 +61,14 @@ protected:
 	afx_msg void OnUpdateLineartrans(CCmdUI* pCmdUI);
 	afx_msg void OnEqualize();
 	afx_msg void OnUpdateEqualize(CCmdUI* pCmdUI);
+	afx_msg void OnFourier();
+	afx_msg void OnUpdateFourier(CCmdUI* pCmdUI);
+	afx_msg void OnInvertFourier();
+	afx_msg void OnUpdateInvertFourier(CCmdUI* pCmdUI);
+	afx_msg void OnFastFourier();
+	afx_msg void OnUpdateFastFourier(CCmdUI* pCmdUI);
+	afx_msg void OnInvertFastFourier();
+	afx_msg void OnUpdateInvertFastFourier(CCmdUI* pCmdUI);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

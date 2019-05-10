@@ -82,25 +82,22 @@ IDR_MAINFRAME           BITMAP  MOVEABLE PURE   "res\\Toolbar.bmp"
 // Toolbar
 //
 
-IDR_MAINFRAME TOOLBAR DISCARDABLE  16, 15
+IDR_MAINFRAME TOOLBAR DISCARDABLE  28, 15
 BEGIN
     BUTTON      ID_FILE_NEW
     BUTTON      ID_FILE_OPEN
     BUTTON      ID_FILE_SAVE
     SEPARATOR
-    BUTTON      ID_EDIT_CUT
-    BUTTON      ID_EDIT_COPY
-    BUTTON      ID_EDIT_PASTE
-    SEPARATOR
-    BUTTON      ID_FILE_PRINT
-    SEPARATOR
-    BUTTON      ID_APP_ABOUT
     BUTTON      ID_RELOAD
     BUTTON      ID_GRAY
     BUTTON      ID_HISTOGRAM
     BUTTON      ID_HISTOGRAM_SUPER
     BUTTON      ID_LINEARTRANS
     BUTTON      ID_EQUALIZE
+    BUTTON      ID_FOURIER
+    BUTTON      ID_INVERT_FOURIER
+    BUTTON      ID_FAST_FOURIER
+    BUTTON      ID_INVERT_FAST_FOURIER
 END
 
 
@@ -383,6 +380,14 @@ BEGIN
     ID_HISTOGRAM_SUPER      "画面显示直方图\n直方图"
     32776                   "线性点运算\n点运算"
     ID_EQUALIZE             "直方图均衡化\n均衡化"
+    ID_FOURIER              "标准傅里叶变换\n傅里叶变换"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    32785                   "逆标准傅里叶变换\n逆傅里叶变换"
+    ID_FAST_FOURIER         "快速傅里叶变换\n快速傅里叶变换"
+    ID_INVERT_FAST_FOURIER  "逆快速傅里叶变换\n逆快速傅里叶变换"
 END
 
 #endif    // Chinese (中国) resources

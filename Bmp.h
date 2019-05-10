@@ -3,6 +3,7 @@
 
 
 extern LPBITMAPINFO lpBitsInfo;
+extern BITMAPINFO *lpBitsInfo_fourier;
 extern int isGray;
 extern int H[256];
 extern int showHistogram;
@@ -13,3 +14,7 @@ void pixel(int x, int y, char *str);
 void histogram();
 void linearTrans(double a, int b);
 void equalize();
+void fourier();
+void invertFourier();
+void fastFourier();
+void invertFastFourier();
