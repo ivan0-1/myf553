@@ -106,6 +106,8 @@ BOOL loadBmpFile(char * bmpFileName) {
 
 	isGray = checkGray();
 	showHistogram = FALSE;
+	free(lpBitsInfoFT);
+	lpBitsInfoFT = NULL;
 	return TRUE;
 }
 
@@ -335,7 +337,6 @@ void fourier() {
 
 	gFD = FD;
 	delete TD;
-
 }
 
 void FT(complex<double>* TD, complex<double>* FD, int M) {
@@ -359,30 +360,31 @@ void invertFourier() {
 	int h = lpBitsInfo->bmiHeader.biHeight;
 
 	complex<double>* TD = new complex<double>[w * h];
+	complex<double>* temp = new complex<double>[w * h];
 
 	int i, j;
-
-	for(i = 0; i < w; i++) {
-		IFT(&gFD[h * i], &TD[h * i], h);
-	}
-	
-	for(i = 0; i < h; i++) {
-		for(j = 0; j < w; j++) {
-			gFD[i + h * j] = TD[j + w * i];
-		}
-	}
 
 	for(i = 0; i < h; i++) {
 		IFT(&gFD[w * i], &TD[w * i], w);
 	}
 
+	for(i = 0; i < h; i++) {
+		for(j = 0; j < w; j++) {
+			temp[i + h * j] = TD[j + w * i];
+		}
+	}
+
+	for(i = 0; i < w; i++) {
+		IFT(&temp[h * i], &TD[h * i], h);
+	}
+
 	for(i = 0; i < w * h; i++) {
 		double tmp = TD[i].real() * pow(-1, i / lineBytes + i);
-		lpBits[i] = BYTE(tmp);
+		lpBits[i] = (BYTE)tmp;
 	}
 
 	delete TD;
-	delete gFD;
+	delete temp;
 }
 
 void IFT(complex<double>* FD, complex<double>* TD, int M) {
@@ -393,7 +395,6 @@ void IFT(complex<double>* FD, complex<double>* TD, int M) {
 			double angle = 2 * PI * u * x / M;
 			TD[u] += FD[x] * complex<double>(cos(angle), sin(angle));
 		}
-		FD[u] /= M;
 	}
 }
 
