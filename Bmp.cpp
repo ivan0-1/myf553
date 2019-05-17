@@ -7,7 +7,7 @@ using namespace std;
 #define PI 3.1415926535
 
 BITMAPINFO *lpBitsInfo = NULL;
-BITMAPINFO *lpBitsInfo_fourier = NULL;
+BITMAPINFO *lpBitsInfoFT = NULL;
 int isGray = FALSE;
 int H[256] = {0, };
 int showHistogram = FALSE;
@@ -276,11 +276,11 @@ void fourier() {
 	int imgSize = lineBytes * lpBitsInfo->bmiHeader.biHeight;
 	int size = sizeof(BITMAPINFOHEADER) + sizeof(RGBQUAD) * 256 + imgSize;
 
-	lpBitsInfo_fourier = (LPBITMAPINFO)malloc(size);
-	memcpy(&lpBitsInfo_fourier->bmiHeader, &lpBitsInfo->bmiHeader, sizeof(BITMAPINFOHEADER));
+	lpBitsInfoFT = (LPBITMAPINFO)malloc(size);
+	memcpy(&lpBitsInfoFT->bmiHeader, &lpBitsInfo->bmiHeader, sizeof(BITMAPINFOHEADER) + sizeof(RGBQUAD) * 256);
 	
 	BYTE *lpBits = (BYTE *)&lpBitsInfo->bmiColors[lpBitsInfo->bmiHeader.biClrUsed];
-	BYTE *lpBits_fourier = (BYTE *)&lpBitsInfo_fourier->bmiColors[lpBitsInfo_fourier->bmiHeader.biClrUsed];
+	BYTE *lpBitsFT = (BYTE *)&lpBitsInfoFT->bmiColors[lpBitsInfoFT->bmiHeader.biClrUsed];
 
 	int w = lpBitsInfo->bmiHeader.biWidth;
 	int h = lpBitsInfo->bmiHeader.biHeight;
@@ -288,8 +288,33 @@ void fourier() {
 	complex<double>* TD = new complex<double>[w * h];
 	complex<double>* FD = new complex<double>[w * h];
 	
-	for(int i = 0; i < imgSize; i++) {
-		TD[i] = complex<double>(lpBits[i] , 0);
+	int i, j;
+
+	for(i = 0; i < imgSize; i++) {
+		TD[i] = complex<double>(lpBits[i] * pow(-1, i / lineBytes + i), 0);
+	}
+
+
+	for(i = 0; i < h; i++) {
+		FT(&TD[w * i], &FD[w * i], w);
+	}
+	
+	for(i = 0; i < h; i++) {
+		for(j = 0; j < w; j++) {
+			TD[i + h * j] = FD[j + w * i];
+		}
+	}
+
+	for(i = 0; i < w; i++) {
+		FT(&TD[h * i], &FD[h * i], h);
+	}
+
+	for(i = 0; i < imgSize; i++) {
+		double tmp = sqrt(pow(FD[i].real(), 2) + pow(FD[i].imag(), 2)) * 1000;
+		if(tmp > 255) {
+			tmp = 255;
+		}
+		lpBitsFT[i] = (BYTE)tmp;
 	}
 
 }

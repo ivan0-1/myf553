@@ -96,18 +96,18 @@ void CMyf553View::OnDraw(CDC* pDC)
 		);
 	}
 
-	if(lpBitsInfo_fourier != NULL) {
-		LPVOID lpBits_fourier = (LPVOID)&lpBitsInfo_fourier->bmiColors[lpBitsInfo_fourier->bmiHeader.biClrUsed];
+	if(lpBitsInfoFT != NULL) {
+		LPVOID lpBitsFT = (LPVOID)&lpBitsInfoFT->bmiColors[lpBitsInfoFT->bmiHeader.biClrUsed];
 		StretchDIBits(
 			pDC->GetSafeHdc(),
 			600, 0,
-			lpBitsInfo_fourier->bmiHeader.biWidth,
-			lpBitsInfo_fourier->bmiHeader.biHeight,
+			lpBitsInfoFT->bmiHeader.biWidth,
+			lpBitsInfoFT->bmiHeader.biHeight,
 			0, 0,
-			lpBitsInfo_fourier->bmiHeader.biWidth,
-			lpBitsInfo_fourier->bmiHeader.biHeight,
-			lpBits_fourier,
-			lpBitsInfo_fourier,
+			lpBitsInfoFT->bmiHeader.biWidth,
+			lpBitsInfoFT->bmiHeader.biHeight,
+			lpBitsFT,
+			lpBitsInfoFT,
 			DIB_RGB_COLORS,
 			SRCCOPY
 		);
@@ -301,7 +301,7 @@ void CMyf553View::OnFourier()
 void CMyf553View::OnUpdateFourier(CCmdUI* pCmdUI) 
 {
 	// TODO: Add your command update UI handler code here
-	pCmdUI->Enable(isGray == TRUE);
+	pCmdUI->Enable(isGray == TRUE && lpBitsInfoFT == NULL);
 }
 
 void CMyf553View::OnInvertFourier() 
@@ -314,7 +314,7 @@ void CMyf553View::OnInvertFourier()
 void CMyf553View::OnUpdateInvertFourier(CCmdUI* pCmdUI) 
 {
 	// TODO: Add your command update UI handler code here
-	pCmdUI->Enable(isGray == TRUE);
+	pCmdUI->Enable(isGray == TRUE && lpBitsInfoFT != NULL);
 }
 
 void CMyf553View::OnFastFourier() 

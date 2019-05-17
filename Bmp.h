@@ -3,7 +3,7 @@
 
 
 extern LPBITMAPINFO lpBitsInfo;
-extern BITMAPINFO *lpBitsInfo_fourier;
+extern BITMAPINFO *lpBitsInfoFT;
 extern int isGray;
 extern int H[256];
 extern int showHistogram;
