@@ -100,7 +100,7 @@ void CMyf553View::OnDraw(CDC* pDC)
 		LPVOID lpBitsFT = (LPVOID)&lpBitsInfoFT->bmiColors[lpBitsInfoFT->bmiHeader.biClrUsed];
 		StretchDIBits(
 			pDC->GetSafeHdc(),
-			600, 0,
+			lpBitsInfo->bmiHeader.biWidth + 30, 0,
 			lpBitsInfoFT->bmiHeader.biWidth,
 			lpBitsInfoFT->bmiHeader.biHeight,
 			0, 0,
@@ -301,7 +301,7 @@ void CMyf553View::OnFourier()
 void CMyf553View::OnUpdateFourier(CCmdUI* pCmdUI) 
 {
 	// TODO: Add your command update UI handler code here
-	pCmdUI->Enable(isGray == TRUE && lpBitsInfoFT == NULL);
+	pCmdUI->Enable(isGray == TRUE);
 }
 
 void CMyf553View::OnInvertFourier() 

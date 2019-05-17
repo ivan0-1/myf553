@@ -8,6 +8,7 @@ using namespace std;
 
 BITMAPINFO *lpBitsInfo = NULL;
 BITMAPINFO *lpBitsInfoFT = NULL;
+complex<double>* gFD = NULL;
 int isGray = FALSE;
 int H[256] = {0, };
 int showHistogram = FALSE;
@@ -22,7 +23,7 @@ int checkGray() {
 	}
 	
 	int flag = TRUE;
-	BYTE R, G, B;
+/*	BYTE R, G, B;
 	for (int i = 0; i < 256; i++) {
 		R = lpBitsInfo->bmiColors[i].rgbRed;
 		G = lpBitsInfo->bmiColors[i].rgbGreen;
@@ -32,7 +33,7 @@ int checkGray() {
 			break;
 		}
 	}
-
+*/
 	return flag;
 }
 
@@ -117,6 +118,9 @@ void gray() {
 
 	int size = sizeof(BITMAPINFOHEADER) + sizeof(RGBQUAD) * 256 + imgSize;
 
+	int w = lpBitsInfo->bmiHeader.biWidth;
+	int h = lpBitsInfo->bmiHeader.biHeight;
+
 	// ·ÖÅä¿Õ¼ä
 	BITMAPINFO *newLpBitsInfo = (LPBITMAPINFO)malloc(size);
 
@@ -142,7 +146,7 @@ void gray() {
 	BYTE *lpBits = (BYTE *)&lpBitsInfo->bmiColors[lpBitsInfo->bmiHeader.biClrUsed];
 	BYTE *newLpBits = (BYTE *)&newLpBitsInfo->bmiColors[newLpBitsInfo->bmiHeader.biClrUsed];
 	
-	for(i = 0, j = 0; i < imgSize; i+=3, j++) {
+	for(i = 0, j = 0; i < w * h; i+=3, j++) {
 		newLpBits[j] = (lpBits[i] + lpBits[i + 1] + lpBits[i + 2]) / 3;
 	}
 
@@ -203,8 +207,8 @@ void pixel(int x, int y, char *str) {
 
 void histogram() {
 	
-	int lineBytes = (lpBitsInfo->bmiHeader.biWidth * lpBitsInfo->bmiHeader.biBitCount + 31) / 32 * 4;
-	int imgSize = lineBytes * lpBitsInfo->bmiHeader.biHeight;
+	int w = lpBitsInfo->bmiHeader.biWidth;
+	int h = lpBitsInfo->bmiHeader.biHeight;
 
 	BYTE *lpBits = (BYTE *)&lpBitsInfo->bmiColors[lpBitsInfo->bmiHeader.biClrUsed];
 
@@ -213,21 +217,21 @@ void histogram() {
 		H[i] = 0;
 	}
 
-	for (i = 0; i < imgSize; i++) {
+	for (i = 0; i < w * h; i++) {
 		H[lpBits[i]]++;
 	}
 
 }
 
 void linearTrans(double a, int b){
-	
-	int lineBytes = (lpBitsInfo->bmiHeader.biWidth * lpBitsInfo->bmiHeader.biBitCount + 31) / 32 * 4;
-	int imgSize = lineBytes * lpBitsInfo->bmiHeader.biHeight;
+
+	int w = lpBitsInfo->bmiHeader.biWidth;
+	int h = lpBitsInfo->bmiHeader.biHeight;
 
 	BYTE *lpBits = (BYTE *)&lpBitsInfo->bmiColors[lpBitsInfo->bmiHeader.biClrUsed];
 
 	double pixel;
-	for (int i = 0; i < imgSize; i++) {
+	for (int i = 0; i < w * h; i++) {
 		pixel = lpBits[i] * a + b +0.5;
 		if(pixel > 255) {
 			pixel = 255;
@@ -242,8 +246,8 @@ void linearTrans(double a, int b){
 
 void equalize() {
 
-	int lineBytes = (lpBitsInfo->bmiHeader.biWidth * lpBitsInfo->bmiHeader.biBitCount + 31) / 32 * 4;
-	int imgSize = lineBytes * lpBitsInfo->bmiHeader.biHeight;
+	int w = lpBitsInfo->bmiHeader.biWidth;
+	int h = lpBitsInfo->bmiHeader.biHeight;
 
 	BYTE *lpBits = (BYTE *)&lpBitsInfo->bmiColors[lpBitsInfo->bmiHeader.biClrUsed];
 	int i;
@@ -251,9 +255,9 @@ void equalize() {
 	histogram();
 
 	double cH[256];
-	cH[0] = 1.0 * H[0] / imgSize;
+	cH[0] = 1.0 * H[0] / (w * h);
 	for(i = 1; i < 256; i++) {
-		cH[i] = 1.0 * H[i] / imgSize + cH[i - 1];
+		cH[i] = 1.0 * H[i] / (w * h) + cH[i - 1];
 	}
 
 	int D[255];
@@ -262,7 +266,7 @@ void equalize() {
 	}
 
 
-	for(i = 0; i < imgSize; i++) {
+	for(i = 0; i < w * h; i++) {
 		lpBits[i] = D[lpBits[i]];
 	}
 
@@ -277,10 +281,21 @@ void fourier() {
 	int size = sizeof(BITMAPINFOHEADER) + sizeof(RGBQUAD) * 256 + imgSize;
 
 	lpBitsInfoFT = (LPBITMAPINFO)malloc(size);
-	memcpy(&lpBitsInfoFT->bmiHeader, &lpBitsInfo->bmiHeader, sizeof(BITMAPINFOHEADER) + sizeof(RGBQUAD) * 256);
+	memcpy(&lpBitsInfoFT->bmiHeader, &lpBitsInfo->bmiHeader, sizeof(BITMAPINFOHEADER));
 	
 	BYTE *lpBits = (BYTE *)&lpBitsInfo->bmiColors[lpBitsInfo->bmiHeader.biClrUsed];
 	BYTE *lpBitsFT = (BYTE *)&lpBitsInfoFT->bmiColors[lpBitsInfoFT->bmiHeader.biClrUsed];
+
+
+	int i ,j;
+
+	for(i = 0; i < 256; i++) {
+		lpBitsInfoFT->bmiColors[i].rgbBlue = i;
+		lpBitsInfoFT->bmiColors[i].rgbGreen = i;
+		lpBitsInfoFT->bmiColors[i].rgbRed = i;
+		lpBitsInfoFT->bmiColors[i].rgbReserved = 0;
+	}
+
 
 	int w = lpBitsInfo->bmiHeader.biWidth;
 	int h = lpBitsInfo->bmiHeader.biHeight;
@@ -288,9 +303,8 @@ void fourier() {
 	complex<double>* TD = new complex<double>[w * h];
 	complex<double>* FD = new complex<double>[w * h];
 	
-	int i, j;
 
-	for(i = 0; i < imgSize; i++) {
+	for(i = 0; i < w * h; i++) {
 		TD[i] = complex<double>(lpBits[i] * pow(-1, i / lineBytes + i), 0);
 	}
 
@@ -309,13 +323,18 @@ void fourier() {
 		FT(&TD[h * i], &FD[h * i], h);
 	}
 
-	for(i = 0; i < imgSize; i++) {
-		double tmp = sqrt(pow(FD[i].real(), 2) + pow(FD[i].imag(), 2)) * 1000;
+	for(i = 0; i < w * h; i++) {
+		double tmp = sqrt(pow(FD[i].real(), 2) + pow(FD[i].imag(), 2)) * 2000;
 		if(tmp > 255) {
 			tmp = 255;
 		}
-		lpBitsFT[i] = (BYTE)tmp;
+		int x = i % w;
+		int y = i / w;
+		lpBitsFT[x * w + y] = (BYTE)tmp;
 	}
+
+	gFD = FD;
+	delete TD;
 
 }
 
@@ -333,7 +352,37 @@ void FT(complex<double>* TD, complex<double>* FD, int M) {
 
 
 void invertFourier() {
-	AfxMessageBox("invertFourier");
+	
+	int lineBytes = (lpBitsInfo->bmiHeader.biWidth * lpBitsInfo->bmiHeader.biBitCount + 31) / 32 * 4;
+	BYTE *lpBits = (BYTE *)&lpBitsInfo->bmiColors[lpBitsInfo->bmiHeader.biClrUsed];
+	int w = lpBitsInfo->bmiHeader.biWidth;
+	int h = lpBitsInfo->bmiHeader.biHeight;
+
+	complex<double>* TD = new complex<double>[w * h];
+
+	int i, j;
+
+	for(i = 0; i < w; i++) {
+		IFT(&gFD[h * i], &TD[h * i], h);
+	}
+	
+	for(i = 0; i < h; i++) {
+		for(j = 0; j < w; j++) {
+			gFD[i + h * j] = TD[j + w * i];
+		}
+	}
+
+	for(i = 0; i < h; i++) {
+		IFT(&gFD[w * i], &TD[w * i], w);
+	}
+
+	for(i = 0; i < w * h; i++) {
+		double tmp = TD[i].real() * pow(-1, i / lineBytes + i);
+		lpBits[i] = BYTE(tmp);
+	}
+
+	delete TD;
+	delete gFD;
 }
 
 void IFT(complex<double>* FD, complex<double>* TD, int M) {

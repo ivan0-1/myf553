@@ -112,6 +112,8 @@ void CMyf553Doc::OnReload()
 	// TODO: Add your command handler code here
 	loadBmpFile(fileName);
 	showHistogram = FALSE;
+	free(lpBitsInfoFT);
+	lpBitsInfoFT = NULL;
 	UpdateAllViews(0);
 }
 
