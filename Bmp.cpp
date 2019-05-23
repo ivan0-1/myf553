@@ -8,6 +8,7 @@ using namespace std;
 
 BITMAPINFO *lpBitsInfo = NULL;
 BITMAPINFO *lpBitsInfoFT = NULL;
+BITMAPINFO *lpBitsInfoFFT = NULL;
 complex<double>* gFD = NULL;
 int isGray = FALSE;
 int H[256] = {0, };
@@ -15,6 +16,8 @@ int showHistogram = FALSE;
 
 void FT(complex<double>* TD, complex<double>* FD, int M);
 void IFT(complex<double>* FD, complex<double>* TD, int M);
+void FFT(complex<double>* TD, complex<double>* FD, int r);
+void IFFT(complex<double>* FD, complex<double>* TD, int r);
 
 int checkGray() {
 
@@ -23,7 +26,7 @@ int checkGray() {
 	}
 	
 	int flag = TRUE;
-/*	BYTE R, G, B;
+	BYTE R, G, B;
 	for (int i = 0; i < 256; i++) {
 		R = lpBitsInfo->bmiColors[i].rgbRed;
 		G = lpBitsInfo->bmiColors[i].rgbGreen;
@@ -33,7 +36,7 @@ int checkGray() {
 			break;
 		}
 	}
-*/
+
 	return flag;
 }
 
@@ -107,7 +110,10 @@ BOOL loadBmpFile(char * bmpFileName) {
 	isGray = checkGray();
 	showHistogram = FALSE;
 	free(lpBitsInfoFT);
+	free(lpBitsInfoFFT);
 	lpBitsInfoFT = NULL;
+	lpBitsInfoFFT = NULL;
+
 	return TRUE;
 }
 
@@ -148,7 +154,7 @@ void gray() {
 	BYTE *lpBits = (BYTE *)&lpBitsInfo->bmiColors[lpBitsInfo->bmiHeader.biClrUsed];
 	BYTE *newLpBits = (BYTE *)&newLpBitsInfo->bmiColors[newLpBitsInfo->bmiHeader.biClrUsed];
 	
-	for(i = 0, j = 0; i < w * h; i+=3, j++) {
+	for(i = 0, j = 0; i < w * h * 3; i+=3, j++) {
 		newLpBits[j] = (lpBits[i] + lpBits[i + 1] + lpBits[i + 2]) / 3;
 	}
 
@@ -282,6 +288,7 @@ void fourier() {
 	int imgSize = lineBytes * lpBitsInfo->bmiHeader.biHeight;
 	int size = sizeof(BITMAPINFOHEADER) + sizeof(RGBQUAD) * 256 + imgSize;
 
+	free(lpBitsInfoFT);
 	lpBitsInfoFT = (LPBITMAPINFO)malloc(size);
 	memcpy(&lpBitsInfoFT->bmiHeader, &lpBitsInfo->bmiHeader, sizeof(BITMAPINFOHEADER));
 	
@@ -385,6 +392,7 @@ void invertFourier() {
 
 	delete TD;
 	delete temp;
+
 }
 
 void IFT(complex<double>* FD, complex<double>* TD, int M) {
@@ -399,9 +407,265 @@ void IFT(complex<double>* FD, complex<double>* TD, int M) {
 }
 
 void fastFourier() {
-	AfxMessageBox("fastFourier");
+	//图像的宽度和高度
+	int width = lpBitsInfo->bmiHeader.biWidth;
+	int height = lpBitsInfo->bmiHeader.biHeight;
+	int LineBytes = (width * lpBitsInfo->bmiHeader.biBitCount + 31)/32 * 4;
+	//指向图像数据指针
+	BYTE* lpBits = (BYTE*)&lpBitsInfo->bmiColors[lpBitsInfo->bmiHeader.biClrUsed];
+
+	// FFT宽度（必须为2的整数次方）
+	int FFT_w = 1;
+	// FFT宽度的幂数，即迭代次数
+	int wp = 0;
+	while(FFT_w * 2 <= width)
+	{
+		FFT_w *= 2;
+		wp ++;
+	}
+
+	// FFT高度（必须为2的整数次方）
+	int FFT_h = 1;
+	// FFT高度的幂数，即迭代次数
+	int hp = 0;
+	while(FFT_h * 2 <= height)
+	{
+		FFT_h *= 2;
+		hp ++;
+	}
+
+	// 分配内存
+	complex<double>* TD = new complex<double>[FFT_w * FFT_h];
+	complex<double>* FD = new complex<double>[FFT_w * FFT_h];
+	
+	int i, j;
+	BYTE* pixel;
+	
+	for(i = 0; i < FFT_h; i++)  // 行
+	{
+		for(j = 0; j < FFT_w; j++)  // 列
+		{
+			// 指向DIB第i行，第j个象素的指针
+			pixel = lpBits + LineBytes * (height - 1 - i) + j;
+
+			// 给时域赋值
+			TD[j + FFT_w * i] = complex<double>(*pixel* pow(-1,i+j), 0);
+		}
+	}
+	
+	for(i = 0; i < FFT_h; i++)
+	{
+		// 对y方向进行快速付立叶变换
+		FFT(&TD[FFT_w * i], &FD[FFT_w * i], wp);
+	}
+	
+	// 保存中间变换结果
+	for(i = 0; i < FFT_h; i++)
+	{
+		for(j = 0; j < FFT_w; j++)
+		{
+			TD[i + FFT_h * j] = FD[j + FFT_w * i];
+		}
+	}
+	
+	for(i = 0; i < FFT_w; i++)
+	{
+		// 对x方向进行快速付立叶变换
+		FFT(&TD[i * FFT_h], &FD[i * FFT_h], hp);
+	}
+
+	// 删除临时变量
+	delete TD;
+
+	//生成频谱图像
+	//为频域图像分配内存
+	LONG size = 40 + 1024 + LineBytes * height;
+	lpBitsInfoFFT = (LPBITMAPINFO) malloc(size);
+	if (NULL == lpBitsInfoFFT)
+		return;
+	memcpy(lpBitsInfoFFT, lpBitsInfo, size);
+
+	//指向频域图像数据指针
+	lpBits = (BYTE*)&lpBitsInfoFFT->bmiColors[lpBitsInfoFFT->bmiHeader.biClrUsed];
+
+	double temp;
+	for(i = 0; i < FFT_h; i++) // 行
+	{
+		for(j = 0; j < FFT_w; j++) // 列
+		{
+			// 计算频谱幅度
+			temp = sqrt(FD[j * FFT_h + i].real() * FD[j * FFT_h + i].real() + 
+				        FD[j * FFT_h + i].imag() * FD[j * FFT_h + i].imag()) *2000;
+			
+			// 判断是否超过255
+			if (temp > 255)
+			{
+				// 对于超过的，直接设置为255
+				temp = 255;
+			}
+			
+			pixel = lpBits + LineBytes * (height - 1 - i) + j;
+
+			// 更新源图像
+			*pixel = (BYTE)(temp);
+		}
+	}
+
+	gFD=FD;
+}
+
+void FFT(complex<double>* TD, complex<double>* FD, int r) {
+
+	LONG count = 1 << r;
+	int i;
+	double angle;
+	complex<double>* W = new complex<double>[count / 2];
+	for(i = 0; i < count / 2; i++)
+	{
+		angle = -i * PI * 2 / count;
+		W[i] = complex<double> (cos(angle), sin(angle));
+	}
+	complex<double>* X1 = new complex<double>[count];
+	memcpy(X1, TD, sizeof(complex<double>) * count);
+	
+	complex<double>* X2 = new complex<double>[count]; 
+
+	int k,j,p,size;
+	complex<double>* temp;
+	for (k = 0; k < r; k++)
+	{
+		for (j = 0; j < 1 << k; j++)
+		{
+			size = 1 << (r-k);
+			for (i = 0; i < size/2; i++)
+			{
+				p = j * size;
+				X2[i + p] = X1[i + p] + X1[i + p + size/2];
+				X2[i + p + size/2] = (X1[i + p] - X1[i + p + size/2]) * W[i * (1<<k)];
+			}
+		}
+		temp  = X1;
+		X1 = X2;
+		X2 = temp;
+	}
+	
+	for (j = 0; j < count; j++)
+	{
+		p = 0;
+		for (i = 0; i < r; i++)
+		{
+			if (j & (1<<i))
+			{
+				p += 1<<(r-i-1);
+			}
+		}
+		FD[j]=X1[p];
+		FD[j] /= count;
+	}
+	
+	delete W;
+	delete X1;
+	delete X2;
+
 }
 
 void invertFastFourier() {
-	AfxMessageBox("invertFastFourier");
+	//图像的宽度和高度
+	int width = lpBitsInfo->bmiHeader.biWidth;
+	int height = lpBitsInfo->bmiHeader.biHeight;
+	int LineBytes = (width * lpBitsInfo->bmiHeader.biBitCount + 31)/32 * 4;
+
+	// FFT宽度（必须为2的整数次方）
+	int FFT_w = 1;
+	// FFT宽度的幂数，即迭代次数
+	int wp = 0;
+	while(FFT_w * 2 <= width)
+	{
+		FFT_w *= 2;
+		wp ++;
+	}
+
+	// FFT高度（必须为2的整数次方）
+	int FFT_h = 1;
+	// FFT高度的幂数，即迭代次数
+	int hp = 0;
+	while(FFT_h * 2 <= height)
+	{
+		FFT_h *= 2;
+		hp ++;
+	}
+
+	// 分配内存
+	complex<double>* TD = new complex<double>[FFT_w * FFT_h];
+	complex<double>* FD = new complex<double>[FFT_w * FFT_h];
+	
+	int i, j;
+	for(i = 0; i < FFT_h; i++)  // 行
+		for(j = 0; j < FFT_w; j++)  // 列
+			FD[j + FFT_w * i] = gFD[i + FFT_h*j];
+	
+	// 沿水平方向进行快速付立叶变换
+	for(i = 0; i < FFT_h; i++)
+		IFFT(&FD[FFT_w * i], &TD[FFT_w * i], wp);
+	
+	// 保存中间变换结果
+	for(i = 0; i < FFT_h; i++)
+		for(j = 0; j < FFT_w; j++)
+			FD[i + FFT_h * j] = TD[j + FFT_w * i];
+	
+	// 沿垂直方向进行快速付立叶变换
+	for(i = 0; i < FFT_w; i++)
+		IFFT(&FD[i * FFT_h], &TD[i * FFT_h], hp);
+
+
+	//指向反变换图像数据指针
+	BYTE* lpBits = (BYTE*)&lpBitsInfo->bmiColors[lpBitsInfo->bmiHeader.biClrUsed];
+	BYTE* pixel;
+	double temp;
+	for(i = 0; i < FFT_h; i++) // 行
+	{
+		for(j = 0; j < FFT_w; j++) // 列
+		{
+			pixel = lpBits + LineBytes * (height - 1 - i) + j;
+			temp= (TD[j*FFT_h + i].real() / pow(-1, i+j));
+			if (temp < 0)
+				temp = 0;
+			else if (temp >255)
+				temp = 255;
+			*pixel = (BYTE)temp;
+		}
+	}
+
+	// 删除临时变量
+	delete FD;
+	delete TD;
+
+}
+
+void IFFT(complex<double>* FD, complex<double>* TD, int r) {
+	// 付立叶变换点数
+	LONG	count;
+	// 计算付立叶变换点数
+	count = 1 << r;
+
+	// 分配运算所需存储器
+	complex<double> * X = new complex<double>[count];
+	// 将频域点写入X
+	memcpy(X, FD, sizeof(complex<double>) * count);
+	
+	// 求共轭
+	for(int i = 0; i < count; i++)
+		X[i] = complex<double> (X[i].real(), -X[i].imag());
+	
+	// 调用快速付立叶变换
+	FFT(X, TD, r);
+	
+	// 求时域点的共轭
+	for(i = 0; i < count; i++)
+		TD[i] = complex<double> (TD[i].real() * count, -TD[i].imag() * count);
+	
+	// 释放内存
+	delete X;
+
+
 }

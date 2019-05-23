@@ -4,6 +4,7 @@
 
 extern LPBITMAPINFO lpBitsInfo;
 extern BITMAPINFO *lpBitsInfoFT;
+extern BITMAPINFO *lpBitsInfoFFT;
 extern int isGray;
 extern int H[256];
 extern int showHistogram;

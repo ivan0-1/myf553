@@ -113,6 +113,23 @@ void CMyf553View::OnDraw(CDC* pDC)
 		);
 	}
 
+	if(lpBitsInfoFFT != NULL) {
+		LPVOID lpBitsFFT = (LPVOID)&lpBitsInfoFFT->bmiColors[lpBitsInfoFFT->bmiHeader.biClrUsed];
+		StretchDIBits(
+			pDC->GetSafeHdc(),
+			lpBitsInfo->bmiHeader.biWidth + 30, 0,
+			lpBitsInfoFFT->bmiHeader.biWidth,
+			lpBitsInfoFFT->bmiHeader.biHeight,
+			0, 0,
+			lpBitsInfoFFT->bmiHeader.biWidth,
+			lpBitsInfoFFT->bmiHeader.biHeight,
+			lpBitsFFT,
+			lpBitsInfoFFT,
+			DIB_RGB_COLORS,
+			SRCCOPY
+		);
+	}
+
 	if(showHistogram){
 		RECT r;
 		r.left = 30;
@@ -340,5 +357,5 @@ void CMyf553View::OnInvertFastFourier()
 void CMyf553View::OnUpdateInvertFastFourier(CCmdUI* pCmdUI) 
 {
 	// TODO: Add your command update UI handler code here
-	pCmdUI->Enable(isGray == TRUE);
+	pCmdUI->Enable(isGray == TRUE && lpBitsInfoFFT != NULL);
 }
