@@ -43,6 +43,14 @@ BEGIN_MESSAGE_MAP(CMyf553View, CScrollView)
 	ON_UPDATE_COMMAND_UI(ID_FAST_FOURIER, OnUpdateFastFourier)
 	ON_COMMAND(ID_INVERT_FAST_FOURIER, OnInvertFastFourier)
 	ON_UPDATE_COMMAND_UI(ID_INVERT_FAST_FOURIER, OnUpdateInvertFastFourier)
+	ON_COMMAND(ID_AVERAGE_FILTER, OnAverageFilter)
+	ON_UPDATE_COMMAND_UI(ID_AVERAGE_FILTER, OnUpdateAverageFilter)
+	ON_COMMAND(ID_MEDIAN_FILTER, OnMedianFilter)
+	ON_UPDATE_COMMAND_UI(ID_MEDIAN_FILTER, OnUpdateMedianFilter)
+	ON_COMMAND(ID_LAPLACE_SHARP, OnLaplaceSharp)
+	ON_UPDATE_COMMAND_UI(ID_LAPLACE_SHARP, OnUpdateLaplaceSharp)
+	ON_COMMAND(ID_GRADIENT_SHARPEN, OnGradientSharpen)
+	ON_UPDATE_COMMAND_UI(ID_GRADIENT_SHARPEN, OnUpdateGradientSharpen)
 	//}}AFX_MSG_MAP
 	// Standard printing commands
 	ON_COMMAND(ID_FILE_PRINT, CScrollView::OnFilePrint)
@@ -359,3 +367,58 @@ void CMyf553View::OnUpdateInvertFastFourier(CCmdUI* pCmdUI)
 	// TODO: Add your command update UI handler code here
 	pCmdUI->Enable(isGray == TRUE && lpBitsInfoFFT != NULL);
 }
+
+
+void CMyf553View::OnAverageFilter() 
+{
+	// TODO: Add your command handler code here
+	averageFilter();
+	Invalidate();
+}
+
+void CMyf553View::OnUpdateAverageFilter(CCmdUI* pCmdUI) 
+{
+	// TODO: Add your command update UI handler code here
+	pCmdUI->Enable(isGray == TRUE);
+}
+
+void CMyf553View::OnMedianFilter() 
+{
+	// TODO: Add your command handler code here
+	medianFilter();
+	Invalidate();
+}
+
+void CMyf553View::OnUpdateMedianFilter(CCmdUI* pCmdUI) 
+{
+	// TODO: Add your command update UI handler code here
+	pCmdUI->Enable(isGray == TRUE);
+}
+
+void CMyf553View::OnGradientSharpen() 
+{
+	// TODO: Add your command handler code here
+	gradientSharpen();
+	Invalidate();
+}
+
+void CMyf553View::OnUpdateGradientSharpen(CCmdUI* pCmdUI) 
+{
+	// TODO: Add your command update UI handler code here
+	pCmdUI->Enable(isGray == TRUE);
+}
+
+void CMyf553View::OnLaplaceSharp() 
+{
+	// TODO: Add your command handler code here
+	laplaceSharpen();
+	Invalidate();
+}
+
+void CMyf553View::OnUpdateLaplaceSharp(CCmdUI* pCmdUI) 
+{
+	// TODO: Add your command update UI handler code here
+	pCmdUI->Enable(isGray == TRUE);
+}
+
+

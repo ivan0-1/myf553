@@ -19,3 +19,7 @@ void fourier();
 void invertFourier();
 void fastFourier();
 void invertFastFourier();
+void averageFilter();
+void medianFilter();
+void gradientSharpen();
+void laplaceSharpen();

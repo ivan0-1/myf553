@@ -98,6 +98,10 @@ BEGIN
     BUTTON      ID_INVERT_FOURIER
     BUTTON      ID_FAST_FOURIER
     BUTTON      ID_INVERT_FAST_FOURIER
+    BUTTON      ID_AVERAGE_FILTER
+    BUTTON      ID_MEDIAN_FILTER
+    BUTTON      ID_GRADIENT_SHARPEN
+    BUTTON      ID_LAPLACE_SHARP
 END
 
 
@@ -114,10 +118,6 @@ BEGIN
         MENUITEM "打开(&O)...\tCtrl+O",         ID_FILE_OPEN
         MENUITEM "保存(&S)\tCtrl+S",            ID_FILE_SAVE
         MENUITEM "另存为(&A)...",               ID_FILE_SAVE_AS
-        MENUITEM SEPARATOR
-        MENUITEM "打印(&P)...\tCtrl+P",         ID_FILE_PRINT
-        MENUITEM "打印预览(&V)",                ID_FILE_PRINT_PREVIEW
-        MENUITEM "打印设置(&R)...",             ID_FILE_PRINT_SETUP
         MENUITEM SEPARATOR
         MENUITEM "最近文件",                    ID_FILE_MRU_FILE1, GRAYED
         MENUITEM SEPARATOR
@@ -212,8 +212,9 @@ VS_VERSION_INFO VERSIONINFO
 BEGIN
     BLOCK "StringFileInfo"
     BEGIN
-        BLOCK "080404B0"
+        BLOCK "080404b0"
         BEGIN
+            VALUE "Comments", "\0"
             VALUE "CompanyName", "\0"
             VALUE "FileDescription", "myf553 Microsoft 基础类应用程序\0"
             VALUE "FileVersion", "1, 0, 0, 1\0"
@@ -221,8 +222,10 @@ BEGIN
             VALUE "LegalCopyright", "版权所有 (C) 2019\0"
             VALUE "LegalTrademarks", "\0"
             VALUE "OriginalFilename", "myf553.EXE\0"
+            VALUE "PrivateBuild", "\0"
             VALUE "ProductName", "myf553 应用程序\0"
             VALUE "ProductVersion", "1, 0, 0, 1\0"
+            VALUE "SpecialBuild", "\0"
         END
     END
     BLOCK "VarFileInfo"
@@ -388,6 +391,10 @@ BEGIN
     32785                   "逆标准傅里叶变换\n逆傅里叶变换"
     ID_FAST_FOURIER         "快速傅里叶变换\n快速傅里叶变换"
     ID_INVERT_FAST_FOURIER  "逆快速傅里叶变换\n逆快速傅里叶变换"
+    ID_AVERAGE_FILTER       " 均值滤波\n均值滤波"
+    32789                   "中值滤波\n中值滤波"
+    32790                   "拉普拉斯锐化\n拉普拉斯锐化"
+    ID_GRADIENT_SHARPEN     "梯度锐化\n梯度锐化"
 END
 
 #endif    // Chinese (中国) resources

@@ -69,6 +69,14 @@ protected:
 	afx_msg void OnUpdateFastFourier(CCmdUI* pCmdUI);
 	afx_msg void OnInvertFastFourier();
 	afx_msg void OnUpdateInvertFastFourier(CCmdUI* pCmdUI);
+	afx_msg void OnAverageFilter();
+	afx_msg void OnUpdateAverageFilter(CCmdUI* pCmdUI);
+	afx_msg void OnMedianFilter();
+	afx_msg void OnUpdateMedianFilter(CCmdUI* pCmdUI);
+	afx_msg void OnLaplaceSharp();
+	afx_msg void OnUpdateLaplaceSharp(CCmdUI* pCmdUI);
+	afx_msg void OnGradientSharpen();
+	afx_msg void OnUpdateGradientSharpen(CCmdUI* pCmdUI);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

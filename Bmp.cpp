@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <complex>
+#include <algorithm>
 using namespace std;
 
 #define PI 3.1415926535
@@ -18,6 +19,7 @@ void FT(complex<double>* TD, complex<double>* FD, int M);
 void IFT(complex<double>* FD, complex<double>* TD, int M);
 void FFT(complex<double>* TD, complex<double>* FD, int r);
 void IFFT(complex<double>* FD, complex<double>* TD, int r);
+void templateOperate(BYTE *newlpBits, int temp[3][3]);
 
 int checkGray() {
 
@@ -666,6 +668,185 @@ void IFFT(complex<double>* FD, complex<double>* TD, int r) {
 	
 	// ÊÍ·ÅÄÚ´æ
 	delete X;
+}
+
+void templateOperate(BYTE *newlpBits, int temp[3][3]) {
+	
+	BYTE *lpBits = (BYTE *)&lpBitsInfo->bmiColors[lpBitsInfo->bmiHeader.biClrUsed];
+	int lineBytes = (lpBitsInfo->bmiHeader.biWidth * lpBitsInfo->bmiHeader.biBitCount + 31) / 32 * 4;
+
+	int w = lpBitsInfo->bmiHeader.biWidth;
+	int h = lpBitsInfo->bmiHeader.biHeight;
+	int i, j, k, l;
+	int coef = 0;
+
+	for(i = 0; i < 3; i++) {
+		for(j = 0; j < 3; j++) {
+			coef += temp[i][j]; 
+		}
+	}
+
+	for(i = 0; i < h; i++) {
+		for(j = 0; j < w; j++) {
+			if (i == 0 || j == 0 || i == h - 1 || j == w - 1){
+				newlpBits[j + i * lineBytes] = lpBits[j + i * lineBytes];
+				continue;
+			}
+			int x = j;
+			int y = (h - 1 - i);
+			int sum = 0;
+			for(k = 0; k < 3; k++) {
+				for(l = 0; l < 3; l++) {
+					sum += lpBits[(x + k - 1) + (y + l - 1) * lineBytes] * temp[k][l];
+				}
+			}
+			sum /= coef;
+			if(sum < 0) {
+				sum = 0;
+			} else if(sum > 255){
+				sum = 255;
+			}
+			newlpBits[x + y * lineBytes] = (BYTE)sum;
+		}
+	}
+	
+}
+
+void averageFilter() {
+
+	int lineBytes = (lpBitsInfo->bmiHeader.biWidth * lpBitsInfo->bmiHeader.biBitCount + 31) / 32 * 4;
+	int imgSize = lineBytes * lpBitsInfo->bmiHeader.biHeight;
+
+	BYTE *lpBits = (BYTE *)&lpBitsInfo->bmiColors[lpBitsInfo->bmiHeader.biClrUsed];
+
+	BYTE *newlpBits = (BYTE *)malloc(imgSize);
+	/*
+	int temp[3][3] = {
+		{1, 2, 1},
+		{2, 4, 2},
+		{1, 2, 1},
+	};
+	*/
+	int temp[3][3] = {
+		{1, 1, 1},
+		{1, 1, 1},
+		{1, 1, 1},
+	};
+	templateOperate(newlpBits, temp);
+
+	memcpy(lpBits, newlpBits, imgSize);
+	free(newlpBits);
+	histogram();
+}
 
 
+void medianFilter() {
+
+	int lineBytes = (lpBitsInfo->bmiHeader.biWidth * lpBitsInfo->bmiHeader.biBitCount + 31) / 32 * 4;
+	int imgSize = lineBytes * lpBitsInfo->bmiHeader.biHeight;
+
+	int w = lpBitsInfo->bmiHeader.biWidth;
+	int h = lpBitsInfo->bmiHeader.biHeight;
+
+	BYTE *lpBits = (BYTE *)&lpBitsInfo->bmiColors[lpBitsInfo->bmiHeader.biClrUsed];
+	BYTE *newlpBits = (BYTE *)malloc(imgSize);
+
+	int i, j, k, l;
+
+	for(i = 0; i < h; i++) {
+		for(j = 0; j < w; j++) {
+			if (i == 0 || j == 0 || i == h - 1 || j == w - 1){
+				newlpBits[j + i * lineBytes] = lpBits[j + i * lineBytes];
+				continue;
+			}
+			int x = j;
+			int y = (h - 1 - i);
+			int mid = 0;
+			int value[9] = {0, };
+			for(k = 0; k < 3; k++) {
+				for(l = 0; l < 3; l++) {
+					value[k * 3 + l] = lpBits[(x + k - 1) + (y + l - 1) * lineBytes];
+				}
+			}
+			sort(value, value + 9);
+			mid = value[4];
+			if(mid < 0) {
+				mid = 0;
+			} else if(mid > 255){
+				mid = 255;
+			}
+			newlpBits[x + y * lineBytes] = (BYTE)mid;
+		}
+	}
+
+	memcpy(lpBits, newlpBits, imgSize);
+	free(newlpBits);
+	histogram();
+}
+
+void gradientSharpen() {
+
+	int lineBytes = (lpBitsInfo->bmiHeader.biWidth * lpBitsInfo->bmiHeader.biBitCount + 31) / 32 * 4;
+	int imgSize = lineBytes * lpBitsInfo->bmiHeader.biHeight;
+
+	int w = lpBitsInfo->bmiHeader.biWidth;
+	int h = lpBitsInfo->bmiHeader.biHeight;
+
+	BYTE *lpBits = (BYTE *)&lpBitsInfo->bmiColors[lpBitsInfo->bmiHeader.biClrUsed];
+	BYTE *newlpBits = (BYTE *)malloc(imgSize);
+
+	int i, j;
+
+	for(i = 0; i < h; i++) {
+		for(j = 0; j < w; j++) {
+			if (i == h - 1 || j == w - 1){
+				newlpBits[j + i * lineBytes] = lpBits[j + i * lineBytes];
+				continue;
+			}
+			int x = j;
+			int y = (h - 1 - i);
+			int tmp = 0;
+			tmp += abs(lpBits[x + y * lineBytes] - lpBits[(x - 1) + y * lineBytes]);
+			tmp += abs(lpBits[x + y * lineBytes] - lpBits[x + (y - 1) * lineBytes]);
+
+			if(tmp < 0) {
+				tmp = 0;
+			} else if(tmp > 255){
+				tmp = 255;
+			}
+			newlpBits[x + y * lineBytes] = (BYTE)tmp;
+		}
+	}
+
+	memcpy(lpBits, newlpBits, imgSize);
+	free(newlpBits);
+	histogram();
+}
+
+void laplaceSharpen() {
+
+	int lineBytes = (lpBitsInfo->bmiHeader.biWidth * lpBitsInfo->bmiHeader.biBitCount + 31) / 32 * 4;
+	int imgSize = lineBytes * lpBitsInfo->bmiHeader.biHeight;
+
+	BYTE *lpBits = (BYTE *)&lpBitsInfo->bmiColors[lpBitsInfo->bmiHeader.biClrUsed];
+
+	BYTE *newlpBits = (BYTE *)malloc(imgSize);
+	
+	int temp[3][3] = {
+		{ 0, -1,  0},
+		{-1,  5, -1},
+		{ 0, -1,  0},
+	};
+	/*
+	int temp[3][3] = {
+		{-1, -1, -1},
+		{-1,  9, -1},
+		{-1, -1, -1},
+	};
+	*/
+	templateOperate(newlpBits, temp);
+
+	memcpy(lpBits, newlpBits, imgSize);
+	free(newlpBits);
+	histogram();
 }
