@@ -77,6 +77,10 @@ protected:
 	afx_msg void OnUpdateLaplaceSharp(CCmdUI* pCmdUI);
 	afx_msg void OnGradientSharpen();
 	afx_msg void OnUpdateGradientSharpen(CCmdUI* pCmdUI);
+	afx_msg void OnIlpf();
+	afx_msg void OnUpdateIlpf(CCmdUI* pCmdUI);
+	afx_msg void OnIhpf();
+	afx_msg void OnUpdateIhpf(CCmdUI* pCmdUI);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

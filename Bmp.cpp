@@ -111,10 +111,6 @@ BOOL loadBmpFile(char * bmpFileName) {
 
 	isGray = checkGray();
 	showHistogram = FALSE;
-	free(lpBitsInfoFT);
-	free(lpBitsInfoFFT);
-	lpBitsInfoFT = NULL;
-	lpBitsInfoFFT = NULL;
 
 	return TRUE;
 }
@@ -849,4 +845,60 @@ void laplaceSharpen() {
 	memcpy(lpBits, newlpBits, imgSize);
 	free(newlpBits);
 	histogram();
+}
+
+void frequencyDomainFilter(int D) {
+
+	int width = lpBitsInfo->bmiHeader.biWidth;
+	int height = lpBitsInfo->bmiHeader.biHeight;
+	int lineBytes = (lpBitsInfo->bmiHeader.biWidth * lpBitsInfo->bmiHeader.biBitCount + 31) / 32 * 4;
+
+	// FFT宽度（必须为2的整数次方）
+	int FFT_w = 1;
+	// FFT宽度的幂数，即迭代次数
+	int wp = 0;
+	while(FFT_w * 2 <= width)
+	{
+		FFT_w *= 2;
+		wp ++;
+	}
+
+	// FFT高度（必须为2的整数次方）
+	int FFT_h = 1;
+	// FFT高度的幂数，即迭代次数
+	int hp = 0;
+	while(FFT_h * 2 <= height)
+	{
+		FFT_h *= 2;
+		hp ++;
+	}
+
+
+	int i,j;
+	double dis;
+	for(i = 0; i < FFT_h; i++) {
+		for(j = 0; j < FFT_w; j++) {
+			dis = sqrt((i - FFT_h / 2) * (i - FFT_h / 2) + (j - FFT_w / 2) * (j - FFT_w / 2));
+			if ((D > 0 && dis > D) || (D < 0 && dis < -D)) {
+				gFD[i * FFT_h + j] = 0;
+			}
+		}
+	}
+
+
+
+	BYTE* lpBitsFFT = (BYTE*)&lpBitsInfoFFT->bmiColors[lpBitsInfoFFT->bmiHeader.biClrUsed];
+	BYTE* pixel;
+
+
+	for(i = 0; i < width * height; i++) {
+		double tmp = sqrt(pow(gFD[i].real(), 2) + pow(gFD[i].imag(), 2)) * 2000;
+		if(tmp > 255) {
+			tmp = 255;
+		}
+		int x = i % width;
+		int y = i / width;
+		lpBitsFFT[(x) * width + (width - y)] = (BYTE)tmp;
+	}
+
 }

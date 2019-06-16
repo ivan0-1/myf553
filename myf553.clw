@@ -41,7 +41,7 @@ Type=0
 HeaderFile=myf553View.h
 ImplementationFile=myf553View.cpp
 Filter=C
-LastObject=ID_GRADIENT_SHARPEN
+LastObject=ID_IHPF
 BaseClass=CScrollView
 VirtualFilter=VWC
 
@@ -127,7 +127,9 @@ Command14=ID_AVERAGE_FILTER
 Command15=ID_MEDIAN_FILTER
 Command16=ID_GRADIENT_SHARPEN
 Command17=ID_LAPLACE_SHARP
-CommandCount=17
+Command18=ID_ILPF
+Command19=ID_IHPF
+CommandCount=19
 
 [DLG:IDD_HISTOGRAM]
 Type=1

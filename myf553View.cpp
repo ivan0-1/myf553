@@ -51,6 +51,10 @@ BEGIN_MESSAGE_MAP(CMyf553View, CScrollView)
 	ON_UPDATE_COMMAND_UI(ID_LAPLACE_SHARP, OnUpdateLaplaceSharp)
 	ON_COMMAND(ID_GRADIENT_SHARPEN, OnGradientSharpen)
 	ON_UPDATE_COMMAND_UI(ID_GRADIENT_SHARPEN, OnUpdateGradientSharpen)
+	ON_COMMAND(ID_ILPF, OnIlpf)
+	ON_UPDATE_COMMAND_UI(ID_ILPF, OnUpdateIlpf)
+	ON_COMMAND(ID_IHPF, OnIhpf)
+	ON_UPDATE_COMMAND_UI(ID_IHPF, OnUpdateIhpf)
 	//}}AFX_MSG_MAP
 	// Standard printing commands
 	ON_COMMAND(ID_FILE_PRINT, CScrollView::OnFilePrint)
@@ -422,3 +426,29 @@ void CMyf553View::OnUpdateLaplaceSharp(CCmdUI* pCmdUI)
 }
 
 
+
+void CMyf553View::OnIlpf() 
+{
+	// TODO: Add your command handler code here
+	frequencyDomainFilter(70);
+	Invalidate();
+}
+
+void CMyf553View::OnUpdateIlpf(CCmdUI* pCmdUI) 
+{
+	// TODO: Add your command update UI handler code here
+	pCmdUI->Enable(isGray == TRUE && gFD != NULL);
+}
+
+void CMyf553View::OnIhpf() 
+{
+	// TODO: Add your command handler code here
+	frequencyDomainFilter(-30);
+	Invalidate();
+}
+
+void CMyf553View::OnUpdateIhpf(CCmdUI* pCmdUI) 
+{
+	// TODO: Add your command update UI handler code here
+	pCmdUI->Enable(isGray == TRUE && gFD != NULL);
+}

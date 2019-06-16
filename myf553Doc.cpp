@@ -113,9 +113,11 @@ void CMyf553Doc::OnReload()
 	loadBmpFile(fileName);
 	showHistogram = FALSE;
 	free(lpBitsInfoFT);
-	free(lpBitsInfoFFT);
+	// free(lpBitsInfoFFT);
+	free(gFD);
 	lpBitsInfoFT = NULL;
 	lpBitsInfoFFT = NULL;
+	gFD = NULL;
 	UpdateAllViews(0);
 }
 
